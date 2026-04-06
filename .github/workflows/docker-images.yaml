@@ -1,0 +1,344 @@
+name: Docker Images
+
+on:
+  workflow_call:
+    inputs:
+      ghcr_frontend_image:
+        type: string
+        required: true
+      ghcr_client_image:
+        type: string
+        required: true
+      vultr_registry:
+        type: string
+        required: false
+        default: ""
+      vultr_frontend_image:
+        type: string
+        required: false
+        default: ""
+      vultr_client_image:
+        type: string
+        required: false
+        default: ""
+      frontend_tags:
+        type: string
+        required: true
+      client_tags:
+        type: string
+        required: true
+      frontend_primary_tag:
+        type: string
+        required: true
+      client_primary_tag:
+        type: string
+        required: true
+      build_frontend:
+        type: boolean
+        required: false
+        default: true
+      build_client:
+        type: boolean
+        required: false
+        default: true
+      app_version:
+        type: string
+        required: true
+      app_build:
+        type: string
+        required: false
+        default: ""
+      attest_best_effort:
+        type: boolean
+        required: false
+        default: true
+    secrets:
+      vultr_username:
+        required: false
+      vultr_password:
+        required: false
+
+jobs:
+  build-docker-arch:
+    name: Build Docker Images
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goarch: amd64
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - goarch: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login in to Vultr Container Registry
+        if: ${{ inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ inputs.vultr_registry }}
+          username: ${{ secrets.vultr_username }}
+          password: ${{ secrets.vultr_password }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute Frontend Tags
+        id: frontend-tags
+        if: ${{ inputs.build_frontend }}
+        env:
+          FRONTEND_TAGS: ${{ inputs.frontend_tags }}
+          GOARCH: ${{ matrix.goarch }}
+          GHCR_IMAGE: ghcr.io/${{ inputs.ghcr_frontend_image }}
+          VULTR_ENABLED: ${{ inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+          VULTR_IMAGE: ${{ inputs.vultr_registry }}/${{ inputs.vultr_frontend_image }}
+        run: |
+          set -euo pipefail
+          tags=""
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            tags="${tags}${GHCR_IMAGE}:${tag}-${GOARCH}"$'\n'
+            if [ "${VULTR_ENABLED}" = "true" ]; then
+              tags="${tags}${VULTR_IMAGE}:${tag}-${GOARCH}"$'\n'
+            fi
+          done <<< "$FRONTEND_TAGS"
+          printf "tags<<'EOF'\n%sEOF\n" "$tags" >> "$GITHUB_OUTPUT"
+
+      - name: Build - Frontend
+        if: ${{ inputs.build_frontend }}
+        uses: docker/build-push-action@v7
+        with:
+          context: "{{defaultContext}}"
+          file: deployments/server.Dockerfile
+          build-args: |
+            APP_VERSION=${{ inputs.app_version }}
+            APP_BUILD=${{ inputs.app_build }}
+          platforms: ${{ matrix.platform }}
+          push: true
+          cache-from: type=gha,scope=frontend-${{ matrix.goarch }}
+          cache-to: type=gha,mode=max,scope=frontend-${{ matrix.goarch }}
+          tags: ${{ steps.frontend-tags.outputs.tags }}
+
+      - name: Compute Client Tags
+        id: client-tags
+        if: ${{ inputs.build_client }}
+        env:
+          CLIENT_TAGS: ${{ inputs.client_tags }}
+          GOARCH: ${{ matrix.goarch }}
+          GHCR_IMAGE: ghcr.io/${{ inputs.ghcr_client_image }}
+          VULTR_ENABLED: ${{ inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+          VULTR_IMAGE: ${{ inputs.vultr_registry }}/${{ inputs.vultr_client_image }}
+        run: |
+          set -euo pipefail
+          tags=""
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            tags="${tags}${GHCR_IMAGE}:${tag}-${GOARCH}"$'\n'
+            if [ "${VULTR_ENABLED}" = "true" ]; then
+              tags="${tags}${VULTR_IMAGE}:${tag}-${GOARCH}"$'\n'
+            fi
+          done <<< "$CLIENT_TAGS"
+          printf "tags<<'EOF'\n%sEOF\n" "$tags" >> "$GITHUB_OUTPUT"
+
+      - name: Build - Client
+        if: ${{ inputs.build_client }}
+        uses: docker/build-push-action@v7
+        with:
+          context: "{{defaultContext}}"
+          file: deployments/client.Dockerfile
+          build-args: |
+            APP_VERSION=${{ inputs.app_version }}
+            APP_BUILD=${{ inputs.app_build }}
+          platforms: ${{ matrix.platform }}
+          push: true
+          cache-from: type=gha,scope=client-${{ matrix.goarch }}
+          cache-to: type=gha,mode=max,scope=client-${{ matrix.goarch }}
+          tags: ${{ steps.client-tags.outputs.tags }}
+
+  merge-docker-manifests:
+    name: Merge Docker Manifests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    needs:
+      - build-docker-arch
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login in to Vultr Container Registry
+        if: ${{ inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ inputs.vultr_registry }}
+          username: ${{ secrets.vultr_username }}
+          password: ${{ secrets.vultr_password }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge Frontend Manifests - GHCR
+        if: ${{ inputs.build_frontend }}
+        env:
+          FRONTEND_TAGS: ${{ inputs.frontend_tags }}
+          GHCR_IMAGE: ghcr.io/${{ inputs.ghcr_frontend_image }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            docker buildx imagetools create \
+              -t "${GHCR_IMAGE}:${tag}" \
+              "${GHCR_IMAGE}:${tag}-amd64" \
+              "${GHCR_IMAGE}:${tag}-arm64"
+          done <<< "$FRONTEND_TAGS"
+
+      - name: Merge Frontend Manifests - Vultr
+        if: ${{ inputs.build_frontend && inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+        env:
+          FRONTEND_TAGS: ${{ inputs.frontend_tags }}
+          VULTR_IMAGE: ${{ inputs.vultr_registry }}/${{ inputs.vultr_frontend_image }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            docker buildx imagetools create \
+              -t "${VULTR_IMAGE}:${tag}" \
+              "${VULTR_IMAGE}:${tag}-amd64" \
+              "${VULTR_IMAGE}:${tag}-arm64"
+          done <<< "$FRONTEND_TAGS"
+
+      - name: Merge Client Manifests - GHCR
+        if: ${{ inputs.build_client }}
+        env:
+          CLIENT_TAGS: ${{ inputs.client_tags }}
+          GHCR_IMAGE: ghcr.io/${{ inputs.ghcr_client_image }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            docker buildx imagetools create \
+              -t "${GHCR_IMAGE}:${tag}" \
+              "${GHCR_IMAGE}:${tag}-amd64" \
+              "${GHCR_IMAGE}:${tag}-arm64"
+          done <<< "$CLIENT_TAGS"
+
+      - name: Merge Client Manifests - Vultr
+        if: ${{ inputs.build_client && inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+        env:
+          CLIENT_TAGS: ${{ inputs.client_tags }}
+          VULTR_IMAGE: ${{ inputs.vultr_registry }}/${{ inputs.vultr_client_image }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            docker buildx imagetools create \
+              -t "${VULTR_IMAGE}:${tag}" \
+              "${VULTR_IMAGE}:${tag}-amd64" \
+              "${VULTR_IMAGE}:${tag}-arm64"
+          done <<< "$CLIENT_TAGS"
+
+      - name: Read Frontend Manifest Digest - GHCR
+        id: frontend-manifest-ghcr
+        if: ${{ inputs.build_frontend }}
+        env:
+          GHCR_IMAGE: ghcr.io/${{ inputs.ghcr_frontend_image }}
+          PRIMARY_TAG: ${{ inputs.frontend_primary_tag }}
+        run: |
+          set -euo pipefail
+          digest=$(docker buildx imagetools inspect "${GHCR_IMAGE}:${PRIMARY_TAG}" --format '{{json .Manifest}}' | jq -r '.digest')
+          test -n "$digest" && test "$digest" != "null"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Read Frontend Manifest Digest - Vultr
+        id: frontend-manifest-vultr
+        if: ${{ inputs.build_frontend && inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+        env:
+          VULTR_IMAGE: ${{ inputs.vultr_registry }}/${{ inputs.vultr_frontend_image }}
+          PRIMARY_TAG: ${{ inputs.frontend_primary_tag }}
+        run: |
+          set -euo pipefail
+          digest=$(docker buildx imagetools inspect "${VULTR_IMAGE}:${PRIMARY_TAG}" --format '{{json .Manifest}}' | jq -r '.digest')
+          test -n "$digest" && test "$digest" != "null"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Frontend Artifact Attestation - GHCR
+        if: ${{ inputs.build_frontend }}
+        uses: actions/attest@v4
+        continue-on-error: ${{ inputs.attest_best_effort }}
+        with:
+          subject-name: ghcr.io/${{ inputs.ghcr_frontend_image }}
+          subject-digest: ${{ steps.frontend-manifest-ghcr.outputs.digest }}
+          create-storage-record: false
+          push-to-registry: true
+
+      - name: Generate Frontend Artifact Attestation - Vultr
+        if: ${{ inputs.build_frontend && inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+        uses: actions/attest@v4
+        continue-on-error: ${{ inputs.attest_best_effort }}
+        with:
+          subject-name: ${{ inputs.vultr_registry }}/${{ inputs.vultr_frontend_image }}
+          subject-digest: ${{ steps.frontend-manifest-vultr.outputs.digest }}
+          create-storage-record: false
+          push-to-registry: true
+
+      - name: Read Client Manifest Digest - GHCR
+        id: client-manifest-ghcr
+        if: ${{ inputs.build_client }}
+        env:
+          GHCR_IMAGE: ghcr.io/${{ inputs.ghcr_client_image }}
+          PRIMARY_TAG: ${{ inputs.client_primary_tag }}
+        run: |
+          set -euo pipefail
+          digest=$(docker buildx imagetools inspect "${GHCR_IMAGE}:${PRIMARY_TAG}" --format '{{json .Manifest}}' | jq -r '.digest')
+          test -n "$digest" && test "$digest" != "null"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Read Client Manifest Digest - Vultr
+        id: client-manifest-vultr
+        if: ${{ inputs.build_client && inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+        env:
+          VULTR_IMAGE: ${{ inputs.vultr_registry }}/${{ inputs.vultr_client_image }}
+          PRIMARY_TAG: ${{ inputs.client_primary_tag }}
+        run: |
+          set -euo pipefail
+          digest=$(docker buildx imagetools inspect "${VULTR_IMAGE}:${PRIMARY_TAG}" --format '{{json .Manifest}}' | jq -r '.digest')
+          test -n "$digest" && test "$digest" != "null"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Client Artifact Attestation - GHCR
+        if: ${{ inputs.build_client }}
+        uses: actions/attest@v4
+        continue-on-error: ${{ inputs.attest_best_effort }}
+        with:
+          subject-name: ghcr.io/${{ inputs.ghcr_client_image }}
+          subject-digest: ${{ steps.client-manifest-ghcr.outputs.digest }}
+          create-storage-record: false
+          push-to-registry: true
+
+      - name: Generate Client Artifact Attestation - Vultr
+        if: ${{ inputs.build_client && inputs.vultr_registry != '' && inputs.vultr_frontend_image != '' && inputs.vultr_client_image != '' }}
+        uses: actions/attest@v4
+        continue-on-error: ${{ inputs.attest_best_effort }}
+        with:
+          subject-name: ${{ inputs.vultr_registry }}/${{ inputs.vultr_client_image }}
+          subject-digest: ${{ steps.client-manifest-vultr.outputs.digest }}
+          create-storage-record: false
+          push-to-registry: true

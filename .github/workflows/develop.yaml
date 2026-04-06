@@ -6,9 +6,6 @@ on:
       - "main"
   workflow_dispatch:
 
-env:
-  GHCR_IMAGE_NAME: realsunyz/bird-lg
-
 jobs:
   changes:
     name: Check Code Changes
@@ -77,145 +74,30 @@ jobs:
           name: bird-lg-client-linux-${{ matrix.goarch }}
           path: apps/client/bird-lg-client-*
 
-  build-docker-arch:
-    name: Build Docker Image
-    runs-on: ${{ matrix.runner }}
-    permissions:
-      contents: read
-      packages: write
+  docker-images:
+    name: Build Docker Images
     needs:
       - changes
     if: always() && (github.event_name == 'workflow_dispatch' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.client-image == 'true')
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - goarch: amd64
-            platform: linux/amd64
-            runner: ubuntu-latest
-          - goarch: arm64
-            platform: linux/arm64
-            runner: ubuntu-24.04-arm
-    steps:
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build - Frontend
-        id: frontend
-        if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.frontend == 'true'
-        uses: docker/build-push-action@v7
-        with:
-          context: "{{defaultContext}}"
-          file: deployments/server.Dockerfile
-          build-args: |
-            APP_VERSION=dev
-            APP_BUILD=${{ github.sha }}
-          platforms: ${{ matrix.platform }}
-          push: true
-          cache-from: type=gha,scope=frontend-${{ matrix.goarch }}
-          cache-to: type=gha,mode=max,scope=frontend-${{ matrix.goarch }}
-          tags: |
-            ghcr.io/${{ env.GHCR_IMAGE_NAME }}:frontend-dev-${{ matrix.goarch }}
-            ghcr.io/${{ env.GHCR_IMAGE_NAME }}:frontend-dev-${{ github.sha }}-${{ matrix.goarch }}
-
-      - name: Build - Client
-        id: client
-        if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.client-image == 'true'
-        uses: docker/build-push-action@v7
-        with:
-          context: "{{defaultContext}}"
-          file: deployments/client.Dockerfile
-          build-args: |
-            APP_VERSION=dev
-            APP_BUILD=${{ github.sha }}
-          platforms: ${{ matrix.platform }}
-          push: true
-          cache-from: type=gha,scope=client-${{ matrix.goarch }}
-          cache-to: type=gha,mode=max,scope=client-${{ matrix.goarch }}
-          tags: |
-            ghcr.io/${{ env.GHCR_IMAGE_NAME }}:client-dev-${{ matrix.goarch }}
-            ghcr.io/${{ env.GHCR_IMAGE_NAME }}:client-dev-${{ github.sha }}-${{ matrix.goarch }}
-
-  merge-docker-manifests:
-    name: Merge Docker Manifests
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/docker-images.yaml
     permissions:
       contents: read
       packages: write
       attestations: write
       id-token: write
-    needs:
-      - changes
-      - build-docker-arch
-    if: always() && (github.event_name == 'workflow_dispatch' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.client-image == 'true')
-    steps:
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Merge - Frontend
-        if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.frontend == 'true'
-        run: |
-          docker buildx imagetools create \
-            -t ghcr.io/${{ env.GHCR_IMAGE_NAME }}:frontend-dev \
-            -t ghcr.io/${{ env.GHCR_IMAGE_NAME }}:frontend-dev-${{ github.sha }} \
-            ghcr.io/${{ env.GHCR_IMAGE_NAME }}:frontend-dev-amd64 \
-            ghcr.io/${{ env.GHCR_IMAGE_NAME }}:frontend-dev-arm64
-
-      - name: Read Frontend Manifest Digest
-        id: frontend-manifest
-        if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.frontend == 'true'
-        run: |
-          digest=$(docker buildx imagetools inspect ghcr.io/${{ env.GHCR_IMAGE_NAME }}:frontend-dev --format '{{json .Manifest}}' | jq -r '.digest')
-          test -n "$digest" && test "$digest" != "null"
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
-
-      - name: Generate Artifact Attestation - Frontend
-        if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.frontend == 'true'
-        uses: actions/attest@v4
-        continue-on-error: true
-        with:
-          subject-name: ghcr.io/${{ env.GHCR_IMAGE_NAME }}
-          subject-digest: ${{ steps.frontend-manifest.outputs.digest }}
-          create-storage-record: false
-          push-to-registry: true
-
-      - name: Merge - Client
-        if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.client-image == 'true'
-        run: |
-          docker buildx imagetools create \
-            -t ghcr.io/${{ env.GHCR_IMAGE_NAME }}:client-dev \
-            -t ghcr.io/${{ env.GHCR_IMAGE_NAME }}:client-dev-${{ github.sha }} \
-            ghcr.io/${{ env.GHCR_IMAGE_NAME }}:client-dev-amd64 \
-            ghcr.io/${{ env.GHCR_IMAGE_NAME }}:client-dev-arm64
-
-      - name: Read Client Manifest Digest
-        id: client-manifest
-        if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.client-image == 'true'
-        run: |
-          digest=$(docker buildx imagetools inspect ghcr.io/${{ env.GHCR_IMAGE_NAME }}:client-dev --format '{{json .Manifest}}' | jq -r '.digest')
-          test -n "$digest" && test "$digest" != "null"
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
-
-      - name: Generate Artifact Attestation - Client
-        if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.client-image == 'true'
-        uses: actions/attest@v4
-        continue-on-error: true
-        with:
-          subject-name: ghcr.io/${{ env.GHCR_IMAGE_NAME }}
-          subject-digest: ${{ steps.client-manifest.outputs.digest }}
-          create-storage-record: false
-          push-to-registry: true
+    with:
+      ghcr_frontend_image: realsunyz/bird-lg
+      ghcr_client_image: realsunyz/bird-lg-client
+      frontend_tags: |
+        frontend-dev
+        frontend-dev-${{ github.sha }}
+      client_tags: |
+        client-dev
+        client-dev-${{ github.sha }}
+      frontend_primary_tag: frontend-dev
+      client_primary_tag: client-dev
+      build_frontend: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.frontend == 'true' }}
+      build_client: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.client-image == 'true' }}
+      app_version: dev
+      app_build: ${{ github.sha }}
+      attest_best_effort: true
