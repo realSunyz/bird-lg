@@ -5,7 +5,8 @@
 listen: ":3000"
 
 # Static files directory
-static_dir: "./apps/web/dist"
+# Override this when serving assets from another path.
+static_dir: "./static"
 
 # Cloudflare Turnstile configuration
 # Leave empty to disable CAPTCHA verification
@@ -21,23 +22,29 @@ jwt:
 hmac:
   secret: ""
 
-# Server nodes configuration
-# Each server connects to a bird-lg-client instance
-servers:
-  - id: tokyo
-    name:
-      en: Tokyo
-      zh: 东京
-    descr:
-      en: Tokyo, Japan
-      zh: 日本东京
-    endpoint: http://localhost:18000
-    icon: "🇯🇵"
+# Optional Logto SSO configuration.
+# When both fields are set, BIRD queries require SSO login.
+logto:
+  endpoint: ""
+  app_id: ""
 
-  # - id: frankfurt
+# Server nodes configuration
+# Each server connects to a client instance
+servers:
+  - id: hkg
+    name:
+      en: Hong Kong
+      zh: 香港
+    descr:
+      en: Hong Kong, China
+      zh: 香港特别行政区, 中国
+    endpoint: http://hkg.example.com:12345
+    icon: HK
+
+  # - id: fra
   #   name:
   #     en: Frankfurt
   #   descr:
   #     en: Frankfurt, Germany
-  #   endpoint: http://frankfurt.example.com:18000
+  #   endpoint: http://frankfurt.example.com:12345
   #   icon: "🇩🇪"

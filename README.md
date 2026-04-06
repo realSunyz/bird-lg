@@ -1,26 +1,55 @@
 # BIRD Looking Glass
 
-![bird-lg](https://socialify.git.ci/realSunyz/bird-lg/image?custom_language=Go&font=Source+Code+Pro&language=1&name=1&owner=1&pattern=Circuit+Board&theme=Auto)
+A web-based looking glass for BIRD routers, backed by a central server and remote probe clients.
+Run Ping and Traceroute from multiple POPs, and optionally query BIRD via SSO.
 
-This project is still in active development and may have breaking changes.
+## Features
 
-## Repository Layout
+- Central server that hosts the UI and proxies requests to probe nodes
+- Remote client nodes that run `ping`, `traceroute`, and BIRD commands
+- Streaming output for Ping and Traceroute via SSE
+- (Optional) Cloudflare Turnstile CAPTCHA gate for tool access
+- (Optional) Logto OIDC SSO for BIRD queries
+- (Optional) Trace IP enrichment via IPInfo Lite
 
-- `apps/server`: central Fiber server entrypoint
-- `apps/client`: remote probing client (separate Go module)
-- `apps/web`: Vite + React frontend
-- `internal/server`: server-only packages grouped by bootstrap/http/platform/services
-- `deployments`: Dockerfiles and example config
-- `schemas`: wire-contract reference docs
+## Quick Start
 
-## Build Commands
+Server:
 
-- Server: `env GOCACHE=/tmp/go-build-server go test ./...`
-- Client: `cd apps/client && env GOCACHE=/tmp/go-build-client go test ./...`
-- Frontend: `pnpm --dir apps/web build`
+```bash
+docker pull ghcr.io/realsunyz/bird-lg:frontend
+```
 
-## IPInfo Lite DB
+Client:
 
-- Set `IPINFO_TOKEN` to let the server download `ipinfo_lite.mmdb` from ipinfo automatically on first Trace IP info lookup.
-- Example source URL: `https://ipinfo.io/data/ipinfo_lite.mmdb?_src=frontend&token=exampletoken`
-- If the download fails, the server falls back to any existing local `data/ipinfo.mmdb`.
+```bash
+docker pull ghcr.io/realsunyz/bird-lg:client
+```
+
+## Configuration
+
+The server reads `config.yaml` by default, or `CONFIG_FILE` if set. Environment variables override the file-based config.
+
+| Variable               | Default                         | Description                                     |
+| ---------------------- | ------------------------------- | ----------------------------------------------- |
+| `CONFIG_FILE`          | `config.yaml`                   | Config file path                                |
+| `LISTEN_ADDR`          | `:3000`                         | Overrides `listen`                              |
+| `STATIC_DIR`           | `./static`                      | Overrides `static_dir`                          |
+| `TURNSTILE_SITE_KEY`   | -                               | Turnstile site key                              |
+| `TURNSTILE_SECRET_KEY` | -                               | Turnstile secret key                            |
+| `JWT_SECRET`           | auto-generated if not specified | JWT signing secret                              |
+| `HMAC_SECRET`          | -                               | Shared secret for server-to-client requests     |
+| `LOGTO_ENDPOINT`       | - (optional)                    | Logto OIDC endpoint                             |
+| `LOGTO_APP_ID`         | - (optional)                    | Logto application ID                            |
+| `SERVERS`              | use `config.yaml`               | Full server list (YAML format)                  |
+| `IPINFO_TOKEN`         | - (optional)                    | IPInfo DB auto-download for trace IP enrichment |
+
+## Contributing
+
+Issues and Pull Requests are definitely welcome!
+
+Please make sure you have tested your code locally before submitting a PR.
+
+## License
+
+Source code is released under the [MIT License](https://github.com/realsunyz/bird-lg/blob/main/LICENSE).
