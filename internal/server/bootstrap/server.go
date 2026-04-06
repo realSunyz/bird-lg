@@ -9,6 +9,7 @@ import (
 	"bird-lg/server/internal/server/http/router"
 	"bird-lg/server/internal/server/platform/config"
 	"bird-lg/server/internal/server/platform/upstream"
+
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/compress"
 	"github.com/gofiber/fiber/v3/middleware/etag"
@@ -28,6 +29,12 @@ func NewServer(cfg *config.Config) *fiber.App {
 		ServerHeader:  "sunyznet",
 		JSONEncoder:   upstream.JSONMarshal,
 		JSONDecoder:   upstream.JSONUnmarshal,
+		TrustProxy:    true,
+		TrustProxyConfig: fiber.TrustProxyConfig{
+			Private:   true,
+			Loopback:  true,
+			LinkLocal: true,
+		},
 	})
 
 	app.Use(recovermw.New())

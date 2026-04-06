@@ -26,7 +26,6 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25"
           go-version-file: apps/client/go.mod
           cache-dependency-path: apps/client/go.sum
 
@@ -37,10 +36,10 @@ jobs:
           CGO_ENABLED: 0
         run: |
           cd apps/client
-          go build -ldflags="-s -w -X bird-lg-client/internal/buildinfo.Version=${{ github.event.release.tag_name }} -X bird-lg-client/internal/buildinfo.Build=${{ github.sha }}" -o bird-lg-client-linux-${{ matrix.goarch }} .
+          go build -ldflags="-s -w -X bird-lg/client/internal/buildinfo.Version=${{ github.event.release.tag_name }} -X bird-lg/client/internal/buildinfo.Build=${{ github.sha }}" -o bird-lg-client-linux-${{ matrix.goarch }} .
 
       - name: Upload Client Binary
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: apps/client/bird-lg-client-*
 

@@ -43,6 +43,7 @@ pnpm-debug.log*
 .env.*.local
 apps/server/config.yaml
 ERROR_CODES.md
+flyio/
 
 # Keys (security)
 *.pem
