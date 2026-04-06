@@ -12,6 +12,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const defaultStaticDir = "./static"
+
 type LocalizedText struct {
 	EN string `yaml:"en" json:"en"`
 	ZH string `yaml:"zh,omitempty" json:"zh,omitempty"`
@@ -74,7 +76,6 @@ type TurnstileConfig struct {
 type Config struct {
 	Listen    string          `yaml:"listen"`
 	StaticDir string          `yaml:"static_dir"`
-	HTTPS     bool            `yaml:"https"`
 	Turnstile TurnstileConfig `yaml:"turnstile"`
 	JWT       struct {
 		Secret string `yaml:"secret"`
@@ -100,17 +101,10 @@ type Config struct {
 	serversByID map[string]*ServerConfig
 }
 
-func (c *Config) CookieName() string {
-	if c.HTTPS {
-		return "__Host-token"
-	}
-	return "token"
-}
-
 func LoadConfig() *Config {
 	cfg := &Config{
 		Listen:    ":3000",
-		StaticDir: "./static",
+		StaticDir: defaultStaticDir,
 		App:       AppSettings{Title: "Looking Glass"},
 	}
 
@@ -124,9 +118,6 @@ func LoadConfig() *Config {
 	if v := os.Getenv("LISTEN_ADDR"); v != "" {
 		cfg.Listen = v
 	}
-	if v := os.Getenv("HTTPS"); v != "" {
-		cfg.HTTPS = v == "true"
-	}
 	if v := os.Getenv("TURNSTILE_SITE_KEY"); v != "" {
 		cfg.Turnstile.SiteKey = v
 	}
@@ -135,6 +126,9 @@ func LoadConfig() *Config {
 	}
 	if v := os.Getenv("JWT_SECRET"); v != "" {
 		cfg.JWT.Secret = v
+	}
+	if v := os.Getenv("STATIC_DIR"); v != "" {
+		cfg.StaticDir = v
 	}
 	if v := os.Getenv("HMAC_SECRET"); v != "" {
 		cfg.HMAC.Secret = v
@@ -186,7 +180,7 @@ func LoadConfig() *Config {
 		logx.Warnf("HMAC_SECRET not configured; requests to router nodes will be unsigned")
 	}
 	if strings.TrimSpace(cfg.StaticDir) == "" {
-		cfg.StaticDir = "./static"
+		cfg.StaticDir = defaultStaticDir
 	}
 	cfg.rebuildServerIndex()
 

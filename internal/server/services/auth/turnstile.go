@@ -131,12 +131,11 @@ func classifyTurnstileError(errorCodes []string) turnstileFailure {
 func SetJWTCookie(c fiber.Ctx, cfg *config.Config) {
 	token := GenerateJWT(cfg.JWTSecret)
 	c.Cookie(&fiber.Cookie{
-		Name:     cfg.CookieName(),
+		Name:     SessionCookieName(),
 		Value:    token,
 		Path:     "/",
 		MaxAge:   300,
 		HTTPOnly: true,
 		SameSite: "Strict",
-		Secure:   cfg.HTTPS,
 	})
 }

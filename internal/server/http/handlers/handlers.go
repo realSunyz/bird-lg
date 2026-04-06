@@ -53,7 +53,7 @@ func HandleAuth(cfg *platformconfig.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		c.Set("Cache-Control", "no-store")
 
-		if payload := authsvc.GetValidJWTPayload(c.Cookies(cfg.CookieName()), cfg.JWTSecret); payload != nil {
+		if payload := authsvc.GetValidJWTPayload(c.Cookies(authsvc.SessionCookieName()), cfg.JWTSecret); payload != nil {
 			return c.JSON(AuthStatusResponse{
 				IsAuthenticated: true,
 				AuthType:        payload.AuthType,

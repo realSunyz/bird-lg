@@ -83,13 +83,12 @@ func HandleLogtoCallback(cfg *config.Config) fiber.Handler {
 
 		token := GenerateJWTWithSub(cfg.JWTSecret, AuthTypeLogto, userInfo.Sub)
 		c.Cookie(&fiber.Cookie{
-			Name:     cfg.CookieName(),
+			Name:     SessionCookieName(),
 			Value:    token,
 			Path:     "/",
 			MaxAge:   int(ExpiryLogto.Seconds()),
 			HTTPOnly: true,
 			SameSite: "Strict",
-			Secure:   cfg.HTTPS,
 		})
 
 		redirect := sanitizeRedirectPath(decodeRedirectState(c.Query("state")))
@@ -170,7 +169,6 @@ func HandleLogtoLogin(cfg *config.Config) fiber.Handler {
 			MaxAge:   300,
 			HTTPOnly: true,
 			SameSite: "Lax",
-			Secure:   cfg.HTTPS,
 		})
 
 		q := url.Values{}
@@ -190,14 +188,13 @@ func HandleLogtoLogin(cfg *config.Config) fiber.Handler {
 func HandleLogtoLogout(cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		c.Cookie(&fiber.Cookie{
-			Name:     cfg.CookieName(),
+			Name:     SessionCookieName(),
 			Value:    "",
 			Path:     "/",
 			MaxAge:   -1,
 			Expires:  time.Now().Add(-1 * time.Hour),
 			HTTPOnly: true,
 			SameSite: "Strict",
-			Secure:   cfg.HTTPS,
 		})
 		return c.Redirect().To("/")
 	}

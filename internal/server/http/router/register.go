@@ -26,8 +26,7 @@ func Register(app *fiber.App, cfg *config.Config) {
 		},
 	}))
 	api.Use(csrf.New(csrf.Config{
-		CookieSecure: cfg.HTTPS,
-		CookieName:   "csrf_",
+		CookieName: "csrf_",
 		Next: func(c fiber.Ctx) bool {
 			return c.Method() == fiber.MethodGet && c.Path() == "/api/config"
 		},
