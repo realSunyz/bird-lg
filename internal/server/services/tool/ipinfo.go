@@ -16,6 +16,7 @@ import (
 	errx "bird-lg/server/internal/server/platform/errors"
 	"bird-lg/server/internal/server/platform/logx"
 	apiclient "bird-lg/server/internal/server/platform/upstream"
+
 	"github.com/gofiber/fiber/v3"
 	maxminddb "github.com/oschwald/maxminddb-golang/v2"
 )
@@ -182,6 +183,7 @@ func downloadTraceIPInfoDB(token string, candidates []string) (string, error) {
 	cc := apiclient.NewHTTPClient()
 	req := cc.R()
 	req.SetTimeout(30 * time.Second)
+	req.SetMaxRedirects(3)
 	resp, err := req.Get(endpoint.String())
 	if err != nil {
 		return "", err
