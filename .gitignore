@@ -42,7 +42,7 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 apps/server/config.yaml
-apps/server/ERROR_CODES.md
+ERROR_CODES.md
 
 # Keys (security)
 *.pem
