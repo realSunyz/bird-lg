@@ -89,13 +89,13 @@ jobs:
       ghcr_frontend_image: realsunyz/bird-lg
       ghcr_client_image: realsunyz/bird-lg-client
       frontend_tags: |
-        frontend-dev
-        frontend-dev-${{ github.sha }}
+        dev
+        dev-${{ github.sha }}
       client_tags: |
-        client-dev
-        client-dev-${{ github.sha }}
-      frontend_primary_tag: frontend-dev
-      client_primary_tag: client-dev
+        dev
+        dev-${{ github.sha }}
+      frontend_primary_tag: dev
+      client_primary_tag: dev
       build_frontend: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.frontend == 'true' }}
       build_client: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.client-image == 'true' }}
       app_version: dev

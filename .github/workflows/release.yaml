@@ -53,13 +53,13 @@ jobs:
       vultr_frontend_image: seven/bird-lg
       vultr_client_image: seven/bird-lg-client
       frontend_tags: |
-        frontend
-        frontend-${{ github.event.release.tag_name }}
+        latest
+        ${{ github.event.release.tag_name }}
       client_tags: |
-        client
-        client-${{ github.event.release.tag_name }}
-      frontend_primary_tag: frontend
-      client_primary_tag: client
+        latest
+        ${{ github.event.release.tag_name }}
+      frontend_primary_tag: latest
+      client_primary_tag: latest
       app_version: ${{ github.event.release.tag_name }}
       app_build: ${{ github.sha }}
       attest_best_effort: false
