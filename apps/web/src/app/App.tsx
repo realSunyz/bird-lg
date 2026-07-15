@@ -35,14 +35,30 @@ function isClientConfig(value: unknown): value is ClientConfig {
   const cfg = value as Partial<ClientConfig>;
   if (!Array.isArray(cfg.servers)) return false;
   if (!cfg.turnstile || typeof cfg.turnstile.siteKey !== "string") return false;
-  if (cfg.logto) {
-    if (
-      typeof cfg.logto.endpoint !== "string" ||
-      typeof cfg.logto.appId !== "string"
-    )
-      return false;
+  if (cfg.logto !== undefined) {
+    if (!cfg.logto) return false;
+    if (typeof cfg.logto.endpoint !== "string" || typeof cfg.logto.appId !== "string") return false;
   }
-  return true;
+
+  const ids = new Set<string>();
+  return cfg.servers.every((server) => {
+    if (!server || typeof server !== "object") return false;
+    if (typeof server.id !== "string" || !server.id.trim() || ids.has(server.id)) return false;
+    if (!isLocalizedText(server.name) || !isLocalizedText(server.descr)) return false;
+    if (server.icon !== undefined && typeof server.icon !== "string") return false;
+    ids.add(server.id);
+    return true;
+  });
+}
+
+function isLocalizedText(value: unknown): value is { en: string; zh?: string } {
+  if (!value || typeof value !== "object") return false;
+  const text = value as { en?: unknown; zh?: unknown };
+  return (
+    typeof text.en === "string" &&
+    text.en.trim().length > 0 &&
+    (text.zh === undefined || typeof text.zh === "string")
+  );
 }
 
 function isAuthStatus(value: unknown): value is AuthStatus {
@@ -50,8 +66,7 @@ function isAuthStatus(value: unknown): value is AuthStatus {
   const auth = value as Partial<AuthStatus>;
   if (typeof auth.isAuthenticated !== "boolean") return false;
   if (auth.user !== undefined && typeof auth.user !== "string") return false;
-  if (auth.authType !== undefined && typeof auth.authType !== "string")
-    return false;
+  if (auth.authType !== undefined && typeof auth.authType !== "string") return false;
   return true;
 }
 
@@ -106,9 +121,7 @@ function AppBootstrap() {
   if (loading) {
     return (
       <div className="min-h-dvh bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">
-          {t.common.loading}
-        </div>
+        <div className="animate-pulse text-muted-foreground">{t.common.loading}</div>
       </div>
     );
   }
@@ -117,10 +130,7 @@ function AppBootstrap() {
     return (
       <div className="min-h-dvh bg-background flex flex-col">
         <AppHeader />
-        <ErrorDisplay
-          title={t.error.title}
-          description={t.error.failed_load_config}
-        >
+        <ErrorDisplay title={t.error.title} description={t.error.failed_load_config}>
           <Button onClick={() => void loadConfig()}>{t.common.retry}</Button>
         </ErrorDisplay>
       </div>
@@ -135,9 +145,7 @@ function AppBootstrap() {
             <Suspense
               fallback={
                 <div className="flex-1 bg-background flex items-center justify-center">
-                  <div className="animate-pulse text-muted-foreground">
-                    {t.common.loading}
-                  </div>
+                  <div className="animate-pulse text-muted-foreground">{t.common.loading}</div>
                 </div>
               }
             >

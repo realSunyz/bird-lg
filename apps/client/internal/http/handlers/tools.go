@@ -97,7 +97,7 @@ func (h *Handler) runTool(
 		return c.JSON(model.WithBuildInfo(model.ApiGenericResponse{Error: platform.PublicErrorFromKey(err.Error())}))
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(c.Context(), timeout)
 	defer cancel()
 
 	out, runErr := h.runner.CombinedOutput(ctx, bin, args)
@@ -134,8 +134,9 @@ func (h *Handler) streamTool(
 	c.Set("Connection", "keep-alive")
 	c.Set("Transfer-Encoding", "chunked")
 
-	c.RequestCtx().SetBodyStreamWriter(func(w *bufio.Writer) {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	requestContext := c.Context()
+	return c.SendStreamWriter(func(w *bufio.Writer) {
+		ctx, cancel := context.WithTimeout(requestContext, timeout)
 		defer cancel()
 
 		err := h.runner.Stream(ctx, bin, args, func(line string) {
@@ -149,7 +150,6 @@ func (h *Handler) streamTool(
 			stream.WriteData(w, platform.PublicErrorFromKey("exec_failed"))
 		}
 	})
-	return nil
 }
 
 func isIgnorablePingExitError(err error) bool {

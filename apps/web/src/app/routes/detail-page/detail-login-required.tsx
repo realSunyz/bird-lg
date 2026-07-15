@@ -7,10 +7,7 @@ interface DetailLoginRequiredProps {
   onCancel: () => void;
 }
 
-export function DetailLoginRequired({
-  loginRedirect,
-  onCancel,
-}: DetailLoginRequiredProps) {
+export function DetailLoginRequired({ loginRedirect, onCancel }: DetailLoginRequiredProps) {
   const { t } = useTranslation();
 
   return (

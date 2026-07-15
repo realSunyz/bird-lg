@@ -7,22 +7,9 @@ import { getLocalizedText } from "@/entities/server/localized-text";
 import { useTranslation } from "@/shared/i18n/provider";
 import { Button } from "@/shared/ui/button";
 import { ErrorDisplay } from "@/shared/ui/error-display";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { QueryErrorAlert } from "@/shared/ui/query-error-alert";
 import { type PopVersionsResponse, type PopVersionInfo } from "@/entities/server/types";
 
@@ -74,7 +61,10 @@ export default function AdminPage() {
 
         if (!response.ok) {
           const message =
-            typeof payload === "object" && payload && "error" in payload && typeof payload.error === "string"
+            typeof payload === "object" &&
+            payload &&
+            "error" in payload &&
+            typeof payload.error === "string"
               ? payload.error
               : "unknown_error";
           throw new Error(message);
@@ -202,7 +192,9 @@ export default function AdminPage() {
                                 {statusLabel}
                               </Badge>
                               {detailMessage ? (
-                                <span className="text-xs text-muted-foreground">{detailMessage}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {detailMessage}
+                                </span>
                               ) : null}
                             </div>
                           </TableCell>

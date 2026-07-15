@@ -1,21 +1,8 @@
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { Spinner } from "@/shared/ui/spinner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { QueryErrorAlert } from "@/shared/ui/query-error-alert";
 import { RawOutputPanel } from "@/shared/ui/raw-output-panel";
 import { useTranslation } from "@/shared/i18n/provider";
@@ -134,7 +121,7 @@ export function RouteTab({
                       onClick={() => onProtocolSelect(p.name)}
                       className={cn(
                         "hover:underline cursor-pointer focus:outline-none",
-                        getStateColor(p.state)
+                        getStateColor(p.state),
                       )}
                     >
                       {p.name}
@@ -157,12 +144,15 @@ export function RouteTab({
         </div>
       )}
 
-      {(!isShowAllProtocols || filteredProtocols.length === 0) && routeData && !loading && !error && (
-        <div className="space-y-4">
-          {bgpDetail && <ProtocolDetailPanel detail={bgpDetail} />}
-          <RawOutputPanel output={routeData} collapsible={!!bgpDetail} />
-        </div>
-      )}
+      {(!isShowAllProtocols || filteredProtocols.length === 0) &&
+        routeData &&
+        !loading &&
+        !error && (
+          <div className="space-y-4">
+            {bgpDetail && <ProtocolDetailPanel detail={bgpDetail} />}
+            <RawOutputPanel output={routeData} collapsible={!!bgpDetail} />
+          </div>
+        )}
     </div>
   );
 }

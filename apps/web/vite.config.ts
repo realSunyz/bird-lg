@@ -49,13 +49,19 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
           if (id.includes("react-circle-flags")) return "flags";
           if (id.includes("shiki") || id.includes("@shikijs")) return "shiki";
-          if (id.includes("@radix-ui") || id.includes("radix-ui") || id.includes("lucide-react") || id.includes("vaul")) return "ui";
+          if (
+            id.includes("@radix-ui") ||
+            id.includes("radix-ui") ||
+            id.includes("lucide-react") ||
+            id.includes("vaul")
+          )
+            return "ui";
           return "vendor";
         },
       },

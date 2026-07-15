@@ -22,7 +22,7 @@ func RequestLog() fiber.Handler {
 		}
 
 		if status >= fiber.StatusBadRequest && status != fiber.StatusNotFound {
-			logx.Warnf("%s %s status=%d dur_ms=%d ip=%s", c.Method(), c.OriginalURL(), status, time.Since(start).Milliseconds(), c.IP())
+			logx.Warnf("%s %s status=%d dur_ms=%d ip=%s", c.Method(), c.Path(), status, time.Since(start).Milliseconds(), c.IP())
 		}
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	httpmiddleware "bird-lg/server/internal/server/http/middleware"
 	"bird-lg/server/internal/server/http/router"
@@ -29,6 +30,9 @@ func NewServer(cfg *config.Config) *fiber.App {
 		ServerHeader:  "sunyznet",
 		JSONEncoder:   upstream.JSONMarshal,
 		JSONDecoder:   upstream.JSONUnmarshal,
+		BodyLimit:     64 * 1024,
+		ReadTimeout:   15 * time.Second,
+		IdleTimeout:   60 * time.Second,
 		TrustProxy:    true,
 		TrustProxyConfig: fiber.TrustProxyConfig{
 			Private:   true,
@@ -65,6 +69,9 @@ func NewServer(cfg *config.Config) *fiber.App {
 		return c.SendFile(indexFile)
 	})
 	app.Get("/detail/:serverId", func(c fiber.Ctx) error {
+		return c.SendFile(indexFile)
+	})
+	app.Get("/admin", func(c fiber.Ctx) error {
 		return c.SendFile(indexFile)
 	})
 

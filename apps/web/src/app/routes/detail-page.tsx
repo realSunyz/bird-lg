@@ -34,7 +34,7 @@ export default function DetailPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [serverId]);
 
   const server = config.servers.find((s) => s.id === serverId);
 
@@ -58,41 +58,30 @@ export default function DetailPage() {
   return (
     <div className="flex-1 bg-background flex flex-col font-sans">
       <AppHeader />
-      <QueryInterface server={server} config={config} />
+      <QueryInterface key={server.id} server={server} config={config} />
     </div>
   );
 }
 
-function QueryInterface({
-  server,
-  config,
-}: {
-  server: ServerConfig;
-  config: ClientConfig;
-}) {
+function QueryInterface({ server, config }: { server: ServerConfig; config: ClientConfig }) {
   const { t, locale } = useTranslation();
   const { theme } = useTheme();
   const isMobile = useMediaQuery("(max-width: 639px)");
-  const turnstileLanguage: TurnstileLangCode =
-    locale === "zh" ? "zh-CN" : "en";
+  const turnstileLanguage: TurnstileLangCode = locale === "zh" ? "zh-CN" : "en";
   const serverName = getLocalizedText(server.name, locale);
 
   const isSSO = config?.auth?.authType === "sso";
-  const [hasToolAuth, setHasToolAuth] = useState(
-    Boolean(config?.auth?.isAuthenticated),
-  );
+  const [hasToolAuth, setHasToolAuth] = useState(Boolean(config?.auth?.isAuthenticated));
   const requiresCaptcha = Boolean(config?.turnstile?.siteKey);
   const canRunToolImmediately = !requiresCaptcha || hasToolAuth;
 
   const [searchParams, setSearchParams] = useSearchParams();
   const defaultTab = searchParams.get("tab");
   const validTabs = ["ping", "trace", ...(isSSO ? ["route"] : [])];
-  const initialTab =
-    defaultTab && validTabs.includes(defaultTab) ? defaultTab : "ping";
+  const initialTab = defaultTab && validTabs.includes(defaultTab) ? defaultTab : "ping";
 
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [enableTabSwitchAnimation, setEnableTabSwitchAnimation] =
-    useState(false);
+  const [enableTabSwitchAnimation, setEnableTabSwitchAnimation] = useState(false);
 
   const [showCaptcha, setShowCaptcha] = useState(false);
   const [showSSOLogin, setShowSSOLogin] = useState(false);
@@ -136,10 +125,7 @@ function QueryInterface({
 
   if (showSSOLogin) {
     return (
-      <DetailLoginRequired
-        loginRedirect={loginRedirect}
-        onCancel={() => setShowSSOLogin(false)}
-      />
+      <DetailLoginRequired loginRedirect={loginRedirect} onCancel={() => setShowSSOLogin(false)} />
     );
   }
 
@@ -201,7 +187,6 @@ function QueryInterface({
           setHasToolAuth(true);
         }}
       />
-
     </div>
   );
 }

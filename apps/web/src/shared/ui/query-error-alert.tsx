@@ -6,8 +6,7 @@ export function QueryErrorAlert({ message }: { message: string }) {
   const { t } = useTranslation();
   if (!message) return null;
 
-  const translatedMessage =
-    message in t.error ? t.error[message as keyof typeof t.error] : message;
+  const translatedMessage = message in t.error ? t.error[message as keyof typeof t.error] : message;
 
   return (
     <Alert variant="destructive">
@@ -17,4 +16,3 @@ export function QueryErrorAlert({ message }: { message: string }) {
     </Alert>
   );
 }
-

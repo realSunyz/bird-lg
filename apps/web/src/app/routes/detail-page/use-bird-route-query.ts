@@ -3,10 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { buildPostJSONHeaders } from "@/shared/lib/csrf";
 import { getToolErrorMessage, isAbortError } from "@/shared/api/tool-client";
 
-export function useBirdRouteQuery(
-  serverId: string,
-  onUnauthorized: () => void,
-) {
+export function useBirdRouteQuery(serverId: string, onUnauthorized: () => void) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<unknown>(null);

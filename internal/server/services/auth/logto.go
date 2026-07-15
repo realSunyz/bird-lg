@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
@@ -24,7 +25,7 @@ func sanitizeRedirectPath(p string) string {
 	if p == "" {
 		return "/"
 	}
-	if !strings.HasPrefix(p, "/") || strings.HasPrefix(p, "//") {
+	if !strings.HasPrefix(p, "/") || strings.HasPrefix(p, "//") || strings.ContainsAny(p, "\\\r\n\t\x00") {
 		return "/"
 	}
 	return p
@@ -78,7 +79,7 @@ func HandleLogtoCallback(cfg *config.Config) fiber.Handler {
 
 		userInfo, err := getLogtoUserInfo(cfg, tokenResp.AccessToken)
 		if err != nil {
-			userInfo = &model.LogtoUserInfo{Sub: "unknown"}
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": errx.FormatPublicError(errx.ErrCodeSSOTokenExchangeFailed, "SSO authentication failed")})
 		}
 
 		token := GenerateJWTWithSub(cfg.JWTSecret, AuthTypeLogto, userInfo.Sub)
@@ -112,10 +113,19 @@ func exchangeLogtoCode(cfg *config.Config, code, verifier string, c fiber.Ctx) (
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Close()
+
+	if resp.StatusCode() < fiber.StatusOK || resp.StatusCode() >= fiber.StatusMultipleChoices {
+		return nil, fmt.Errorf("token endpoint returned status %d", resp.StatusCode())
+	}
 
 	var tokenResp model.LogtoTokenResponse
 	if err := resp.JSON(&tokenResp); err != nil {
 		return nil, err
+	}
+	tokenResp.AccessToken = strings.TrimSpace(tokenResp.AccessToken)
+	if tokenResp.AccessToken == "" {
+		return nil, fmt.Errorf("token endpoint returned an empty access token")
 	}
 	return &tokenResp, nil
 }
@@ -131,10 +141,19 @@ func getLogtoUserInfo(cfg *config.Config, accessToken string) (*model.LogtoUserI
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Close()
+
+	if resp.StatusCode() < fiber.StatusOK || resp.StatusCode() >= fiber.StatusMultipleChoices {
+		return nil, fmt.Errorf("userinfo endpoint returned status %d", resp.StatusCode())
+	}
 
 	var userInfo model.LogtoUserInfo
 	if err := resp.JSON(&userInfo); err != nil {
 		return nil, err
+	}
+	userInfo.Sub = strings.TrimSpace(userInfo.Sub)
+	if userInfo.Sub == "" {
+		return nil, fmt.Errorf("userinfo endpoint returned an empty subject")
 	}
 	return &userInfo, nil
 }

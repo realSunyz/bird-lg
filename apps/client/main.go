@@ -39,6 +39,9 @@ func main() {
 	app := fiber.New(fiber.Config{
 		JSONEncoder: platform.JSONMarshal,
 		JSONDecoder: platform.JSONUnmarshal,
+		BodyLimit:   64 * 1024,
+		ReadTimeout: 15 * time.Second,
+		IdleTimeout: 60 * time.Second,
 	})
 
 	app.Use(recovermw.New())
@@ -62,8 +65,10 @@ func main() {
 		AllowCredentials: false,
 	}))
 
+	auth := middleware.NewAuth(cfg.HMACSecret)
+	tool := app.Group("/api/tool", auth.Wrap(func(c fiber.Ctx) error { return c.Next() }))
 	if cfg.RateLimitMS > 0 {
-		app.Use("/api/tool", limiter.New(limiter.Config{
+		tool.Use(limiter.New(limiter.Config{
 			Max:        1,
 			Expiration: time.Duration(cfg.RateLimitMS) * time.Millisecond,
 			KeyGenerator: func(_ fiber.Ctx) string {
@@ -78,14 +83,13 @@ func main() {
 		}))
 	}
 
-	auth := middleware.NewAuth(cfg.HMACSecret)
 	h := handlers.New(runner.SystemRunner{}, cfg.BirdSocket)
 
-	app.Post("/api/tool/ping", auth.Wrap(middleware.WithTimeout(h.Ping, handlers.PingTimeout)))
-	app.Post("/api/tool/ping/stream", auth.Wrap(h.PingStream))
-	app.Post("/api/tool/traceroute", auth.Wrap(middleware.WithTimeout(h.Traceroute, handlers.TracerouteTimeout)))
-	app.Post("/api/tool/traceroute/stream", auth.Wrap(h.TracerouteStream))
-	app.Post("/api/tool/bird", auth.Wrap(middleware.WithTimeout(h.Bird, handlers.BirdTimeout)))
+	tool.Post("/ping", middleware.WithTimeout(h.Ping, handlers.PingTimeout))
+	tool.Post("/ping/stream", h.PingStream)
+	tool.Post("/traceroute", middleware.WithTimeout(h.Traceroute, handlers.TracerouteTimeout))
+	tool.Post("/traceroute/stream", h.TracerouteStream)
+	tool.Post("/bird", middleware.WithTimeout(h.Bird, handlers.BirdTimeout))
 	app.Post("/api/version", auth.Wrap(h.Version))
 	app.Get("/api/health", healthcheck.New())
 

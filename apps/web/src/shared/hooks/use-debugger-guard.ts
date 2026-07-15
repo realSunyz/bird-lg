@@ -16,12 +16,9 @@ export function useDebuggerGuard() {
     const checkDebugger = () => {
       const startedAt = performance.now();
 
-      debugger;
+      debugger; // oxlint-disable-line no-debugger -- intentional pause-time detection
 
-      if (
-        performance.now() - startedAt > BLOCK_THRESHOLD_MS &&
-        !isBlockedRef.current
-      ) {
+      if (performance.now() - startedAt > BLOCK_THRESHOLD_MS && !isBlockedRef.current) {
         isBlockedRef.current = true;
         setIsBlocked(true);
       }

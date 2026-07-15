@@ -45,7 +45,7 @@ func BuildCommand(target string) (string, []string, error) {
 	if target == "" {
 		return "", nil, fmt.Errorf("empty_target")
 	}
-	if strings.ContainsAny(target, ";&|`$(){}[]<>\\'\"\\n\\r\\t") {
+	if strings.HasPrefix(target, "-") || strings.ContainsAny(target, " \t\r\n;&|`$(){}[]<>\\'\"") {
 		return "", nil, fmt.Errorf("invalid_target")
 	}
 

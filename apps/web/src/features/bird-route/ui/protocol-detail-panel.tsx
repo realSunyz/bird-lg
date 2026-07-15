@@ -9,7 +9,8 @@ interface ProtocolDetailPanelProps {
 }
 
 export function ProtocolDetailPanel({ detail, onClose }: ProtocolDetailPanelProps) {
-  const isEstablished = detail.state.toLowerCase() === "established" || detail.state.toLowerCase() === "up";
+  const isEstablished =
+    detail.state.toLowerCase() === "established" || detail.state.toLowerCase() === "up";
 
   return (
     <div className="rounded-xl border bg-card text-card-foreground w-full mx-auto font-sans">
@@ -25,7 +26,7 @@ export function ProtocolDetailPanel({ detail, onClose }: ProtocolDetailPanelProp
                   "border-transparent text-xs px-2 py-0.5 font-semibold",
                   isEstablished
                     ? "bg-green-500/10 text-green-500 dark:bg-green-500/20 dark:text-green-400"
-                    : "bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-400"
+                    : "bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-400",
                 )}
               >
                 {detail.state}
@@ -36,10 +37,7 @@ export function ProtocolDetailPanel({ detail, onClose }: ProtocolDetailPanelProp
             </div>
           </div>
           {onClose && (
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-muted rounded-md transition-colors"
-            >
+            <button onClick={onClose} className="p-1 hover:bg-muted rounded-md transition-colors">
               <ChevronUp className="w-5 h-5 text-muted-foreground" />
             </button>
           )}
@@ -58,7 +56,9 @@ export function ProtocolDetailPanel({ detail, onClose }: ProtocolDetailPanelProp
           <DetailItem
             label="Routes Filtered"
             value={detail.routesFiltered}
-            valueClassName={parseInt(detail.routesFiltered) > 0 ? "text-orange-500 dark:text-orange-400" : ""}
+            valueClassName={
+              parseInt(detail.routesFiltered) > 0 ? "text-orange-500 dark:text-orange-400" : ""
+            }
           />
 
           <DetailItem label="Name" value={detail.description} />
@@ -69,15 +69,11 @@ export function ProtocolDetailPanel({ detail, onClose }: ProtocolDetailPanelProp
 
         {/* Stats Section */}
         <div className="space-y-6 pt-6">
-          {detail.importUpdates && (
-            <StatsRow title="Import Updates" stats={detail.importUpdates} />
-          )}
+          {detail.importUpdates && <StatsRow title="Import Updates" stats={detail.importUpdates} />}
           {detail.importWithdraws && (
             <StatsRow title="Import Withdraws" stats={detail.importWithdraws} />
           )}
-          {detail.exportUpdates && (
-            <StatsRow title="Export Updates" stats={detail.exportUpdates} />
-          )}
+          {detail.exportUpdates && <StatsRow title="Export Updates" stats={detail.exportUpdates} />}
           {detail.exportWithdraws && (
             <StatsRow title="Export Withdraws" stats={detail.exportWithdraws} />
           )}

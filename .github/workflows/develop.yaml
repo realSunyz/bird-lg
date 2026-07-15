@@ -17,7 +17,7 @@ jobs:
       client-image: ${{ steps.filter.outputs.client-image }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -32,11 +32,13 @@ jobs:
               - 'internal/server/**'
               - 'go.mod'
               - 'go.sum'
+              - '.dockerignore'
               - 'deployments/server.Dockerfile'
             client-binary:
               - 'apps/client/**'
             client-image:
               - 'apps/client/**'
+              - '.dockerignore'
               - 'deployments/client.Dockerfile'
 
   build-client-binary:
@@ -51,7 +53,7 @@ jobs:
         goarch: [amd64, arm64]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Golang
         uses: actions/setup-go@v6
@@ -69,7 +71,7 @@ jobs:
           go build -ldflags="-s -w -X bird-lg/client/internal/buildinfo.Version=dev -X bird-lg/client/internal/buildinfo.Build=${{ github.sha }}" -o bird-lg-client-linux-${{ matrix.goarch }} .
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: bird-lg-client-linux-${{ matrix.goarch }}
           path: apps/client/bird-lg-client-*

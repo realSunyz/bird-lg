@@ -17,13 +17,13 @@ Run Ping and Traceroute from multiple POPs, and optionally query BIRD via SSO.
 Server:
 
 ```bash
-docker pull ghcr.io/realsunyz/bird-lg:frontend
+docker pull ghcr.io/realsunyz/bird-lg:latest
 ```
 
 Client:
 
 ```bash
-docker pull ghcr.io/realsunyz/bird-lg:client
+docker pull ghcr.io/realsunyz/bird-lg-client:latest
 ```
 
 ## Configuration

@@ -98,7 +98,7 @@ func HandleBird(cfg *platformconfig.Config) fiber.Handler {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": errx.FormatPublicError(errx.ErrCodeAuthSSORequired, "SSO authentication required")})
 		}
 		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok || authsvc.ClaimString(claims, "auth_type") != authsvc.AuthTypeLogto {
+		if !ok || authsvc.ClaimString(claims, "auth_type") != authsvc.AuthTypeLogto || authsvc.ClaimString(claims, "sub") == "" {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": errx.FormatPublicError(errx.ErrCodeAuthSSORequired, "SSO authentication required")})
 		}
 
@@ -191,9 +191,8 @@ func handleToolStream(cfg *platformconfig.Config, upstreamPath string, timeout t
 		c.Set("Cache-Control", "no-cache")
 		c.Set("Connection", "keep-alive")
 		c.Set("Transfer-Encoding", "chunked")
-		c.RequestCtx().SetBodyStreamWriter(func(w *bufio.Writer) {
+		return c.SendStreamWriter(func(w *bufio.Writer) {
 			upstream.StreamFromUpstream(w, reqPayload.Endpoint, reqPayload.UpstreamPath, reqPayload.Payload, cfg.HMACSecret, timeout)
 		})
-		return nil
 	}
 }

@@ -24,17 +24,10 @@ interface ResponsiveDialogProps {
   description?: string;
 }
 
-export function ResponsiveDialog({
-  children,
-  content,
-  title,
-  description,
-}: ResponsiveDialogProps) {
+export function ResponsiveDialog({ children, content, title, description }: ResponsiveDialogProps) {
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const [open, setOpen] = useState(false);
-  const dialogDescriptionProps = description
-    ? undefined
-    : { "aria-describedby": undefined };
+  const dialogDescriptionProps = description ? undefined : { "aria-describedby": undefined };
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen && typeof document !== "undefined") {
       const activeElement = document.activeElement;
@@ -58,9 +51,7 @@ export function ResponsiveDialog({
             <DialogTitle>{title}</DialogTitle>
             {description ? <DialogDescription>{description}</DialogDescription> : null}
           </DialogHeader>
-          <div className="max-h-[calc(85dvh-4.5rem)] overflow-y-auto px-6 pb-6">
-            {content}
-          </div>
+          <div className="max-h-[calc(85dvh-4.5rem)] overflow-y-auto px-6 pb-6">{content}</div>
         </DialogContent>
       </Dialog>
     );
@@ -69,17 +60,12 @@ export function ResponsiveDialog({
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent
-        className="max-h-[85dvh] overflow-hidden"
-        {...(dialogDescriptionProps ?? {})}
-      >
+      <DrawerContent className="max-h-[85dvh] overflow-hidden" {...(dialogDescriptionProps ?? {})}>
         <DrawerHeader className="px-6 pt-4 pb-3 text-left">
           <DrawerTitle>{title}</DrawerTitle>
           {description ? <DrawerDescription>{description}</DrawerDescription> : null}
         </DrawerHeader>
-        <div className="max-h-[calc(85dvh-4.5rem)] overflow-y-auto px-6 pb-8 pt-0">
-          {content}
-        </div>
+        <div className="max-h-[calc(85dvh-4.5rem)] overflow-y-auto px-6 pb-8 pt-0">{content}</div>
       </DrawerContent>
     </Drawer>
   );

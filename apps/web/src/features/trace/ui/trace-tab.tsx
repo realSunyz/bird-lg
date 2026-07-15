@@ -109,7 +109,9 @@ export function TraceTab({
           placeholder={isMobile ? t.detail.target_placeholder_mobile : t.detail.target_placeholder}
           value={target}
           onChange={(e) => setTarget(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && target.trim().length > 0 && !loading && handleTrace()}
+          onKeyDown={(e) =>
+            e.key === "Enter" && target.trim().length > 0 && !loading && handleTrace()
+          }
           className={toolInputClass}
         />
         <Button onClick={() => void handleTrace()} disabled={loading || target.trim().length === 0}>

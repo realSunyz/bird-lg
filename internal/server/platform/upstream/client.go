@@ -53,9 +53,7 @@ func newConfiguredClient(enableStream bool) *fiberclient.Client {
 	cc.SetJSONMarshal(JSONMarshal)
 	cc.SetJSONUnmarshal(JSONUnmarshal)
 	if enableStream {
-		if fc := cc.FasthttpClient(); fc != nil {
-			fc.StreamResponseBody = true
-		}
+		cc.SetStreamResponseBody(true)
 	}
 	return cc
 }
@@ -162,6 +160,7 @@ func ProxyToClientPath(endpoint, path string, request any, hmacSecret string) (m
 	if err != nil {
 		return model.APIGenericResponse{}, fiber.NewError(fiber.StatusBadGateway, errx.FormatPublicError(errx.ErrCodeServerConnectFailed, "Failed to connect to upstream client"))
 	}
+	defer resp.Close()
 
 	var result model.APIGenericResponse
 	if err := resp.JSON(&result); err != nil {
@@ -201,6 +200,7 @@ func FetchClientVersion(endpoint, hmacSecret string) (model.ClientVersionRespons
 	if err != nil {
 		return model.ClientVersionResponse{}, fiber.NewError(fiber.StatusBadGateway, errx.FormatPublicError(errx.ErrCodeServerConnectFailed, "Failed to connect to upstream client"))
 	}
+	defer resp.Close()
 
 	if resp.StatusCode() != fiber.StatusOK {
 		if resp.StatusCode() == fiber.StatusNotFound && strings.TrimSpace(string(resp.Body())) == "Not Found" {

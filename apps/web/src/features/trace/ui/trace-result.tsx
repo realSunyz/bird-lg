@@ -1,14 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DynamicFlag } from "@sankyu/react-circle-flags";
 import { Card, CardContent } from "@/shared/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { RawOutputPanel } from "@/shared/ui/raw-output-panel";
 import { useTranslation } from "@/shared/i18n/provider";
 import { Slot } from "@/shared/ui/animate-ui/primitives/animate/slot";
@@ -116,9 +109,7 @@ export function TraceResult({ rawOutput }: TraceResultProps) {
   useEffect(() => {
     const pendingIPs = uniqueIPs.filter(
       (ip) =>
-        !traceIPInfo[ip] &&
-        !requestedIPsRef.current.has(ip) &&
-        !inFlightIPsRef.current.has(ip),
+        !traceIPInfo[ip] && !requestedIPsRef.current.has(ip) && !inFlightIPsRef.current.has(ip),
     );
     if (pendingIPs.length === 0) return;
 
@@ -126,9 +117,7 @@ export function TraceResult({ rawOutput }: TraceResultProps) {
     const timer = window.setTimeout(() => {
       const batch = uniqueIPs.filter(
         (ip) =>
-          !traceIPInfo[ip] &&
-          !requestedIPsRef.current.has(ip) &&
-          !inFlightIPsRef.current.has(ip),
+          !traceIPInfo[ip] && !requestedIPsRef.current.has(ip) && !inFlightIPsRef.current.has(ip),
       );
       if (batch.length === 0) return;
 
@@ -177,8 +166,12 @@ export function TraceResult({ rawOutput }: TraceResultProps) {
                   <TableHead className="w-[50px] pl-4 sm:pl-6">#</TableHead>
                   <TableHead>{t.detail.trace_result.address}</TableHead>
                   <TableHead className="sm:hidden">{t.detail.trace_result.info}</TableHead>
-                  <TableHead className="hidden sm:table-cell">{t.detail.trace_result.country}</TableHead>
-                  <TableHead className="hidden sm:table-cell">{t.detail.trace_result.asn}</TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    {t.detail.trace_result.country}
+                  </TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    {t.detail.trace_result.asn}
+                  </TableHead>
                   <TableHead className="pr-4 sm:pr-6">{t.detail.trace_result.rtt}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -190,12 +183,16 @@ export function TraceResult({ rawOutput }: TraceResultProps) {
 
                   return (
                     <TableRow key={`${hop.hop}-${hop.address}`} className="text-sm">
-                      <TableCell className="pl-4 font-medium font-mono sm:pl-6">{hop.hop}</TableCell>
+                      <TableCell className="pl-4 font-medium font-mono sm:pl-6">
+                        {hop.hop}
+                      </TableCell>
                       <TableCell className="py-3">
                         <div className="flex flex-col">
                           <span className="font-mono">{hop.address}</span>
                           {hop.rdns && (
-                            <span className="font-mono text-xs text-muted-foreground">{hop.rdns}</span>
+                            <span className="font-mono text-xs text-muted-foreground">
+                              {hop.rdns}
+                            </span>
                           )}
                         </div>
                       </TableCell>
@@ -203,7 +200,10 @@ export function TraceResult({ rawOutput }: TraceResultProps) {
                         {(countryCode && countryCode.length === 2) || asn ? (
                           <div className="flex items-center gap-2 text-foreground">
                             {countryCode && countryCode.length === 2 && (
-                              <DynamicFlag code={countryCode} className="size-4 shrink-0 rounded-full overflow-hidden" />
+                              <DynamicFlag
+                                code={countryCode}
+                                className="size-4 shrink-0 rounded-full overflow-hidden"
+                              />
                             )}
                             {asn ? (
                               <span className="font-mono text-muted-foreground">{asn}</span>
@@ -219,9 +219,14 @@ export function TraceResult({ rawOutput }: TraceResultProps) {
                         {(countryCode && countryCode.length === 2) || ipinfo?.country ? (
                           <div className="flex items-center gap-2 text-foreground">
                             {countryCode && countryCode.length === 2 && (
-                              <DynamicFlag code={countryCode} className="size-4 shrink-0 rounded-full overflow-hidden" />
+                              <DynamicFlag
+                                code={countryCode}
+                                className="size-4 shrink-0 rounded-full overflow-hidden"
+                              />
                             )}
-                            <span className="whitespace-normal break-words">{ipinfo?.country || ipinfo?.countryCode}</span>
+                            <span className="whitespace-normal break-words">
+                              {ipinfo?.country || ipinfo?.countryCode}
+                            </span>
                           </div>
                         ) : (
                           <span className="text-muted-foreground">-</span>
@@ -232,9 +237,7 @@ export function TraceResult({ rawOutput }: TraceResultProps) {
                           <div className="flex items-center gap-2 text-foreground">
                             <span className="font-mono text-muted-foreground">{asn}</span>
                             {ipinfo?.asName && (
-                              <span className="whitespace-normal break-words">
-                                {ipinfo.asName}
-                              </span>
+                              <span className="whitespace-normal break-words">{ipinfo.asName}</span>
                             )}
                           </div>
                         ) : (
@@ -267,10 +270,16 @@ export function TraceResult({ rawOutput }: TraceResultProps) {
                 })}
                 {hops.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="hidden p-8 text-center text-muted-foreground sm:table-cell">
+                    <TableCell
+                      colSpan={5}
+                      className="hidden p-8 text-center text-muted-foreground sm:table-cell"
+                    >
                       {t.detail.trace_result.starting}
                     </TableCell>
-                    <TableCell colSpan={4} className="p-8 text-center text-muted-foreground sm:hidden">
+                    <TableCell
+                      colSpan={4}
+                      className="p-8 text-center text-muted-foreground sm:hidden"
+                    >
                       {t.detail.trace_result.starting}
                     </TableCell>
                   </TableRow>

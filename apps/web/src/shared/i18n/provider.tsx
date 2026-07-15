@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useCallback,
-  useState,
-} from "react";
+import React, { createContext, useContext, useMemo, useCallback, useEffect, useState } from "react";
 import { dictionaries, type Locale, type Dictionary } from "@/shared/i18n/dictionaries";
 
 type I18nContextType = {
@@ -49,6 +43,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const t = useMemo(() => dictionaries[locale], [locale]);
   const value = useMemo(() => ({ locale, setLocale, t }), [locale, setLocale, t]);
+
+  useEffect(() => {
+    document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
+  }, [locale]);
+
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 

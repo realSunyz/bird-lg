@@ -11,10 +11,7 @@ let highlighterInstance: any = null;
 const getHighlighter = async () => {
   if (highlighterInstance) return highlighterInstance;
   highlighterInstance = await createHighlighterCore({
-    themes: [
-      import("shiki/themes/github-light.mjs"),
-      import("shiki/themes/github-dark.mjs"),
-    ],
+    themes: [import("shiki/themes/github-light.mjs"), import("shiki/themes/github-dark.mjs")],
     langs: [import("shiki/langs/shell.mjs")],
     engine: createJavaScriptRegexEngine(),
   });
@@ -45,7 +42,11 @@ function sanitizeHighlightedHtml(input: string): string {
       const value = part.slice(idx + 1).trim();
       if (!allowedStyleProps.has(prop)) continue;
       const lower = value.toLowerCase();
-      if (lower.includes("url(") || lower.includes("expression(") || lower.includes("javascript:")) {
+      if (
+        lower.includes("url(") ||
+        lower.includes("expression(") ||
+        lower.includes("javascript:")
+      ) {
         continue;
       }
       kept.push(`${prop}: ${value}`);
@@ -97,7 +98,11 @@ interface RawOutputPanelProps {
   collapsible?: boolean;
 }
 
-export function RawOutputPanel({ output, defaultOpen = false, collapsible = true }: RawOutputPanelProps) {
+export function RawOutputPanel({
+  output,
+  defaultOpen = false,
+  collapsible = true,
+}: RawOutputPanelProps) {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const [showRaw, setShowRaw] = useState(collapsible ? defaultOpen : true);
@@ -130,7 +135,7 @@ export function RawOutputPanel({ output, defaultOpen = false, collapsible = true
           highlighter.codeToHtml(output, {
             lang: "shell",
             theme: resolveTheme(),
-          })
+          }),
         );
       })
       .catch((e) => {
@@ -158,9 +163,7 @@ export function RawOutputPanel({ output, defaultOpen = false, collapsible = true
           className="flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-accent/30"
           onClick={() => setShowRaw(!showRaw)}
         >
-          <span className="text-base font-normal tracking-tight">
-            {t.detail.raw_output}
-          </span>
+          <span className="text-base font-normal tracking-tight">{t.detail.raw_output}</span>
           {showRaw ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </button>
       )}

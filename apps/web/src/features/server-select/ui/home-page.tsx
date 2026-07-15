@@ -72,7 +72,6 @@ export default function HomePage() {
           <p className="text-yellow-600 mt-4 font-sans">{t.home.no_servers}</p>
         )}
       </div>
-
     </div>
   );
 }

@@ -188,20 +188,26 @@ export function PingResult({ rawOutput }: PingResultProps) {
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t px-6 py-4 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">{t.detail.ping_result.packet_loss}</span>
-                  <span className={stats.loss > 0 ? "font-semibold text-destructive" : "font-semibold"}>
+                  <span
+                    className={stats.loss > 0 ? "font-semibold text-destructive" : "font-semibold"}
+                  >
                     {stats.loss}%
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">{t.detail.ping_result.avg_latency}</span>
                   <span className={getLatencyClassName(stats.avg)}>
-                    {stats.avg !== undefined ? `${stats.avg.toFixed(2)} ms` : t.detail.ping_result.na}
+                    {stats.avg !== undefined
+                      ? `${stats.avg.toFixed(2)} ms`
+                      : t.detail.ping_result.na}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">{t.detail.ping_result.jitter}</span>
                   <span className={getLatencyClassName(stats.mdev)}>
-                    {stats.mdev !== undefined ? `${stats.mdev.toFixed(2)} ms` : t.detail.ping_result.na}
+                    {stats.mdev !== undefined
+                      ? `${stats.mdev.toFixed(2)} ms`
+                      : t.detail.ping_result.na}
                   </span>
                 </div>
               </div>

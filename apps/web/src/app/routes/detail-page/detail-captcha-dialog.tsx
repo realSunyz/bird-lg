@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Turnstile,
-  type TurnstileLangCode,
-} from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileLangCode } from "@marsidev/react-turnstile";
 import { AlertCircle } from "lucide-react";
 
 import { Button } from "@/shared/ui/button";
@@ -22,12 +19,7 @@ import { getToolErrorMessage, isAbortError } from "@/shared/api/tool-client";
 function mapTurnstileClientError(errorCode?: string): string {
   const code = (errorCode ?? "").trim();
 
-  if (
-    code === "110100" ||
-    code === "110110" ||
-    code === "400020" ||
-    code === "400070"
-  ) {
+  if (code === "110100" || code === "110110" || code === "400020" || code === "400070") {
     return "captcha_misconfigured";
   }
 
@@ -192,10 +184,7 @@ export function DetailCaptchaDialog({
                     signal: controller.signal,
                     body: JSON.stringify({ token }),
                   });
-                  if (
-                    verifyRequestRef.current !== controller ||
-                    controller.signal.aborted
-                  ) {
+                  if (verifyRequestRef.current !== controller || controller.signal.aborted) {
                     return;
                   }
 
@@ -214,10 +203,7 @@ export function DetailCaptchaDialog({
                   }
 
                   const errorJSON = await response.json().catch(() => ({}));
-                  if (
-                    verifyRequestRef.current !== controller ||
-                    controller.signal.aborted
-                  ) {
+                  if (verifyRequestRef.current !== controller || controller.signal.aborted) {
                     return;
                   }
 
@@ -255,11 +241,7 @@ export function DetailCaptchaDialog({
         )}
         {captchaError && (
           <DialogFooter className="flex-row justify-stretch sm:justify-end">
-            <Button
-              variant="outline"
-              className="flex-1 sm:flex-none"
-              onClick={closeDialog}
-            >
+            <Button variant="outline" className="flex-1 sm:flex-none" onClick={closeDialog}>
               {t.common.cancel}
             </Button>
             <Button

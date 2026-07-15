@@ -1,6 +1,16 @@
 package bird
 
+import (
+	"strings"
+	"unicode"
+)
+
 func IsAllowedCommand(cmd string) bool {
+	cmd = strings.TrimSpace(cmd)
+	if cmd == "" || len(cmd) > 4096 || strings.ContainsRune(cmd, ';') || strings.IndexFunc(cmd, unicode.IsControl) >= 0 {
+		return false
+	}
+
 	allowed := []string{
 		"show route",
 		"show protocols",
@@ -16,7 +26,7 @@ func IsAllowedCommand(cmd string) bool {
 	}
 
 	for _, prefix := range allowed {
-		if len(cmd) >= len(prefix) && cmd[:len(prefix)] == prefix {
+		if cmd == prefix || (strings.HasPrefix(cmd, prefix) && cmd[len(prefix)] == ' ') {
 			return true
 		}
 	}

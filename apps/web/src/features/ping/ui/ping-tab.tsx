@@ -9,13 +9,7 @@ import { useBufferedText } from "@/shared/hooks/use-buffered-text";
 import { useMediaQuery } from "@/shared/hooks/use-media-query";
 import { QueryErrorAlert } from "@/shared/ui/query-error-alert";
 import { getToolErrorMessage, isAbortError, runStreamRequest } from "@/shared/api/tool-client";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 
 const toolInputClass = "flex-1 font-mono text-base md:text-sm";
 
@@ -121,7 +115,9 @@ export function PingTab({
           placeholder={isMobile ? t.detail.target_placeholder_mobile : t.detail.target_placeholder}
           value={target}
           onChange={(e) => setTarget(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && target.trim().length > 0 && !loading && handlePing()}
+          onKeyDown={(e) =>
+            e.key === "Enter" && target.trim().length > 0 && !loading && handlePing()
+          }
           className={toolInputClass}
         />
         <div className="hidden sm:block">
@@ -130,26 +126,14 @@ export function PingTab({
               <SelectValue placeholder={t.detail.ping_count} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1">
-                1 {t.detail.ping_packets}
-              </SelectItem>
-              <SelectItem value="2">
-                2 {t.detail.ping_packets}
-              </SelectItem>
-              <SelectItem value="4">
-                4 {t.detail.ping_packets}
-              </SelectItem>
-              <SelectItem value="8">
-                8 {t.detail.ping_packets}
-              </SelectItem>
+              <SelectItem value="1">1 {t.detail.ping_packets}</SelectItem>
+              <SelectItem value="2">2 {t.detail.ping_packets}</SelectItem>
+              <SelectItem value="4">4 {t.detail.ping_packets}</SelectItem>
+              <SelectItem value="8">8 {t.detail.ping_packets}</SelectItem>
               {isSSO && (
                 <>
-                  <SelectItem value="10">
-                    10 {t.detail.ping_packets}
-                  </SelectItem>
-                  <SelectItem value="20">
-                    20 {t.detail.ping_packets}
-                  </SelectItem>
+                  <SelectItem value="10">10 {t.detail.ping_packets}</SelectItem>
+                  <SelectItem value="20">20 {t.detail.ping_packets}</SelectItem>
                 </>
               )}
             </SelectContent>

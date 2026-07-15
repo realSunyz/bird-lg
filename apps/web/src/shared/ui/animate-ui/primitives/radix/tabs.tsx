@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Tabs as TabsPrimitive } from "radix-ui";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@/shared/lib/utils";
 import { type HTMLMotionProps, type Transition } from "motion/react";
 import * as motion from "motion/react-m";

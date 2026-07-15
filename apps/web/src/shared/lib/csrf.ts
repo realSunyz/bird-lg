@@ -12,7 +12,11 @@ export function getCsrfToken(): string {
     const key = rawKey.trim();
     if (key !== CSRF_COOKIE_NAME) continue;
 
-    return decodeURIComponent(rest.join("=").trim());
+    try {
+      return decodeURIComponent(rest.join("=").trim());
+    } catch {
+      return "";
+    }
   }
 
   return "";

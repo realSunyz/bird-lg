@@ -26,8 +26,10 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(storageKey);
-      if (isTheme(stored)) return stored;
+      try {
+        const stored = localStorage.getItem(storageKey);
+        if (isTheme(stored)) return stored;
+      } catch {}
     }
     return defaultTheme;
   });
@@ -62,7 +64,9 @@ export function ThemeProvider({
   const setThemeValue = useCallback(
     (newTheme: Theme) => {
       if (typeof window !== "undefined") {
-        localStorage.setItem(storageKey, newTheme);
+        try {
+          localStorage.setItem(storageKey, newTheme);
+        } catch {}
       }
       setTheme(newTheme);
     },

@@ -34,11 +34,9 @@ export const dictionaries = {
       title: "PoP Administration",
       description: "View the bird-lg client version for each PoP.",
       table_title: "PoP Versions",
-      table_description:
-        "All entries are fetched from the corresponding server.",
+      table_description: "All entries are fetched from the corresponding server.",
       login_required_title: "Sign In Required",
-      login_required_description:
-        "Please sign in with SSO to access this page.",
+      login_required_description: "Please sign in with SSO to access this page.",
       columns: {
         pop: "PoP",
         version: "Version",
@@ -51,8 +49,7 @@ export const dictionaries = {
         unavailable: "Unavailable",
       },
       messages: {
-        incompatible:
-          "Client is too old and does not support the version endpoint.",
+        incompatible: "Client is too old and does not support the version endpoint.",
       },
     },
     detail: {
@@ -100,8 +97,7 @@ export const dictionaries = {
     error: {
       title: "Error",
       page_not_found_title: "Page Not Found",
-      page_not_found_description:
-        "The page you are looking for does not exist.",
+      page_not_found_description: "The page you are looking for does not exist.",
       verification_failed: "Verification failed.",
       auth_required: "Authentication required.",
       invalid_request: "Invalid request.",
@@ -110,8 +106,7 @@ export const dictionaries = {
       server_error: "Target server is unavailable.",
       sso_error: "SSO service is unavailable.",
       unknown_error: "An unexpected error occurred.",
-      rate_limit_exceeded:
-        "You have exceeded the rate limit, please try again later.",
+      rate_limit_exceeded: "You have exceeded the rate limit, please try again later.",
       server_not_found: "The selected server does not exist.",
       target_required: "Target is required.",
       target_invalid_format: "Target must be a valid IP address or domain.",
@@ -132,13 +127,10 @@ export const dictionaries = {
         "The CAPTCHA failed due to a system clock or cached page issue. Please refresh the page and try again.",
       captcha_load_failed: "Failed to load the CAPTCHA widget.",
       captcha_widget_error: "The CAPTCHA widget encountered an error.",
-      captcha_domain_not_allowed:
-        "This hostname is not allowed, please contact the NOC.",
+      captcha_domain_not_allowed: "This hostname is not allowed, please contact the NOC.",
       captcha_challenge_failed: "The CAPTCHA challenge failed.",
-      captcha_unsupported:
-        "Your browser is not supported by the CAPTCHA widget.",
-      captcha_misconfigured:
-        "The CAPTCHA service is misconfigured, please contact the NOC.",
+      captcha_unsupported: "Your browser is not supported by the CAPTCHA widget.",
+      captcha_misconfigured: "The CAPTCHA service is misconfigured, please contact the NOC.",
       failed_load_config: "Failed to load configuration.",
     },
   },
@@ -263,12 +255,10 @@ export const dictionaries = {
       captcha_token_spent: "验证码令牌已被使用或已过期。",
       captcha_expired: "人机验证已过期。",
       captcha_timeout: "人机验证校验超时。",
-      captcha_clock_or_cache_issue:
-        "人机验证因系统时间或缓存页面问题失败，请刷新页面后重试。",
+      captcha_clock_or_cache_issue: "人机验证因系统时间或缓存页面问题失败，请刷新页面后重试。",
       captcha_load_failed: "人机验证组件加载失败。",
       captcha_widget_error: "人机验证组件发生错误。",
-      captcha_domain_not_allowed:
-        "当前域名不在人机验证服务白名单内, 请联系 NOC。",
+      captcha_domain_not_allowed: "当前域名不在人机验证服务白名单内, 请联系 NOC。",
       captcha_challenge_failed: "人机验证挑战失败。",
       captcha_unsupported: "当前浏览器不支持人机验证组件。",
       captcha_misconfigured: "人机验证服务配置错误, 请联系 NOC。",

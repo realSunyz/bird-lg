@@ -57,9 +57,7 @@ export function AUPDialog({ mobile = false }: AUPDialogProps) {
         <div className="mx-auto max-w-[42rem] space-y-3 pr-2 text-sm leading-5.5">
           <p className="text-sm leading-5.5 text-foreground">{content.intro}</p>
           <section className="space-y-1.5">
-            <p className="text-sm leading-5.5 text-foreground">
-              {content.prohibitedIntro}
-            </p>
+            <p className="text-sm leading-5.5 text-foreground">{content.prohibitedIntro}</p>
             <ul className="list-disc space-y-1.5 pl-5 text-sm leading-5.5 text-foreground">
               {content.prohibitedItems.map((item) => (
                 <li key={item}>{item}</li>

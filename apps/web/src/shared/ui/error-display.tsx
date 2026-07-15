@@ -1,9 +1,4 @@
-import {
-  AlertCircle,
-  AlertTriangle,
-  XCircle,
-  type LucideIcon,
-} from "lucide-react";
+import { AlertCircle, AlertTriangle, XCircle, type LucideIcon } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 interface ErrorDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -54,9 +49,7 @@ export function ErrorDisplay({
         </div>
         <div className="space-y-1.5">
           <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-          <div className="text-sm text-muted-foreground leading-relaxed">
-            {description}
-          </div>
+          <div className="text-sm text-muted-foreground leading-relaxed">{description}</div>
         </div>
         {children && <div>{children}</div>}
       </div>

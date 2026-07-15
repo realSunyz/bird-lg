@@ -188,6 +188,7 @@ func downloadTraceIPInfoDB(token string, candidates []string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer resp.Close()
 
 	if resp.StatusCode() != fiber.StatusOK {
 		return "", fmt.Errorf("ipinfo download failed with status %d", resp.StatusCode())

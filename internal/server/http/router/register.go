@@ -14,6 +14,8 @@ import (
 )
 
 func Register(app *fiber.App, cfg *config.Config) {
+	app.Get("/api/health", healthcheck.New())
+
 	api := app.Group("/api")
 	api.Use(limiter.New(limiter.Config{
 		Max:        120,
@@ -47,7 +49,6 @@ func Register(app *fiber.App, cfg *config.Config) {
 
 	api.Get("/config", httpmiddleware.WithTimeout(handlers.HandleConfig(cfg), 5*time.Second))
 	api.Get("/auth", httpmiddleware.WithTimeout(handlers.HandleAuth(cfg), 5*time.Second))
-	api.Get("/health", healthcheck.New())
 	api.Get("/admin/pops", ssoAuth, httpmiddleware.WithTimeout(handlers.HandleAdminPops(cfg), 20*time.Second))
 	api.Post("/verify", httpmiddleware.WithTimeout(handlers.HandleVerify(cfg), 10*time.Second))
 	api.Post("/bird", ssoAuth, httpmiddleware.WithTimeout(handlers.HandleBird(cfg), 35*time.Second))

@@ -19,6 +19,8 @@ var bogonPrefixes = mustParseBogonPrefixes([]string{
 	"203.0.113.0/24",
 	"224.0.0.0/4",
 	"240.0.0.0/4",
+	"::/128",
+	"::1/128",
 	"100::/64",
 	"2001:2::/48",
 	"2001:10::/28",
@@ -54,6 +56,7 @@ func ValidateToolTarget(raw string) (string, string) {
 }
 
 func isBogonIP(ip netip.Addr) bool {
+	ip = ip.Unmap()
 	for _, prefix := range bogonPrefixes {
 		if prefix.Contains(ip) {
 			return true

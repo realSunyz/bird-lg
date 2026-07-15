@@ -1,8 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/shared/ui/card";
+import { Card, CardContent, CardHeader } from "@/shared/ui/card";
 import {
   Tabs,
   TabsContent,
@@ -99,11 +95,7 @@ export function DetailTabsCard({
             value="ping"
             forceMount
             className="mt-0"
-            initial={
-              enableTabSwitchAnimation
-                ? { opacity: 0, filter: "blur(4px)" }
-                : false
-            }
+            initial={enableTabSwitchAnimation ? { opacity: 0, filter: "blur(4px)" } : false}
           >
             <PingTab
               activeServer={serverId}
@@ -116,11 +108,7 @@ export function DetailTabsCard({
             value="trace"
             forceMount
             className="mt-0"
-            initial={
-              enableTabSwitchAnimation
-                ? { opacity: 0, filter: "blur(4px)" }
-                : false
-            }
+            initial={enableTabSwitchAnimation ? { opacity: 0, filter: "blur(4px)" } : false}
           >
             <TraceTab
               activeServer={serverId}
@@ -133,11 +121,7 @@ export function DetailTabsCard({
               value="route"
               forceMount
               className="mt-0"
-              initial={
-                enableTabSwitchAnimation
-                  ? { opacity: 0, filter: "blur(4px)" }
-                  : false
-              }
+              initial={enableTabSwitchAnimation ? { opacity: 0, filter: "blur(4px)" } : false}
             >
               <RouteTab
                 runBirdQuery={runBirdQuery}

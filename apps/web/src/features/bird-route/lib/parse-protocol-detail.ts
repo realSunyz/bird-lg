@@ -72,9 +72,7 @@ function formatNumberString(numStr: string): string {
   return num.toString();
 }
 
-export function parseBgpProtocolDetail(
-  output: string,
-): BgpProtocolDetail | null {
+export function parseBgpProtocolDetail(output: string): BgpProtocolDetail | null {
   if (!output || typeof output !== "string") return null;
 
   let lines = output
@@ -99,9 +97,7 @@ export function parseBgpProtocolDetail(
 
   const name = firstLineParts[0];
   const state =
-    extractValue(lines, "BGP state:") ||
-    firstLineParts[firstLineParts.length - 1] ||
-    "Unknown";
+    extractValue(lines, "BGP state:") || firstLineParts[firstLineParts.length - 1] || "Unknown";
   const description = extractValue(lines, "Description:");
   const neighborIp = extractValue(lines, "Neighbor address:");
   const neighborAs = extractValue(lines, "Neighbor AS:");

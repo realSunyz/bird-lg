@@ -4,9 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 )
+
+const responseCodeAccessRestricted = 16
 
 func Query(socketPath, command string, timeout time.Duration) (string, error) {
 	conn, err := net.DialTimeout("unix", socketPath, 5*time.Second)
@@ -25,7 +28,7 @@ func Query(socketPath, command string, timeout time.Duration) (string, error) {
 
 	reader := bufio.NewReader(conn)
 
-	if _, err = readResponse(reader); err != nil {
+	if _, _, err = readResponse(reader); err != nil {
 		if isTimeoutError(err) {
 			return "", fmt.Errorf("timeout")
 		}
@@ -38,7 +41,8 @@ func Query(socketPath, command string, timeout time.Duration) (string, error) {
 		}
 		return "", fmt.Errorf("bird_restrict_failed")
 	}
-	if _, err = readResponse(reader); err != nil {
+	_, responseCode, err := readResponse(reader)
+	if err != nil || responseCode != responseCodeAccessRestricted {
 		if isTimeoutError(err) {
 			return "", fmt.Errorf("timeout")
 		}
@@ -52,7 +56,7 @@ func Query(socketPath, command string, timeout time.Duration) (string, error) {
 		return "", fmt.Errorf("bird_command_failed")
 	}
 
-	response, err := readResponse(reader)
+	response, _, err := readResponse(reader)
 	if err != nil {
 		if isTimeoutError(err) {
 			return "", fmt.Errorf("timeout")
@@ -67,7 +71,7 @@ func isTimeoutError(err error) bool {
 	return ok && netErr.Timeout()
 }
 
-func readResponse(reader *bufio.Reader) (string, error) {
+func readResponse(reader *bufio.Reader) (string, int, error) {
 	var result strings.Builder
 	isEndLine := func(line string) bool {
 		if len(line) < 5 {
@@ -84,21 +88,24 @@ func readResponse(reader *bufio.Reader) (string, error) {
 
 	for {
 		line, err := reader.ReadString('\n')
-		if err != nil {
-			return result.String(), err
-		}
-
-		if len(line) > 5 && line[4] == '-' {
-			line = line[5:]
-		} else if isEndLine(line) {
-			if len(line) > 5 {
-				result.WriteString(line[5:])
+		if len(line) > 0 {
+			if len(line) > 5 && line[4] == '-' {
+				line = line[5:]
+			} else if isEndLine(line) {
+				responseCode, parseErr := strconv.Atoi(line[:4])
+				if parseErr != nil {
+					return result.String(), -1, parseErr
+				}
+				if len(line) > 5 {
+					result.WriteString(line[5:])
+				}
+				return result.String(), responseCode, nil
 			}
-			break
+
+			result.WriteString(line)
 		}
-
-		result.WriteString(line)
+		if err != nil {
+			return result.String(), -1, err
+		}
 	}
-
-	return result.String(), nil
 }

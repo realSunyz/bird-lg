@@ -70,6 +70,13 @@ func verifyTurnstile(secretKey, token, remoteIP string) (bool, turnstileFailure)
 			public: errx.FormatPublicError(errx.ErrCodeCaptchaUnavailable, "The CAPTCHA service is currently unavailable. Please try again later or contact the NOC"),
 		}
 	}
+	defer resp.Close()
+	if resp.StatusCode() < fiber.StatusOK || resp.StatusCode() >= fiber.StatusMultipleChoices {
+		return false, turnstileFailure{
+			status: fiber.StatusServiceUnavailable,
+			public: errx.FormatPublicError(errx.ErrCodeCaptchaUnavailable, "The CAPTCHA service is currently unavailable. Please try again later or contact the NOC"),
+		}
+	}
 
 	var result TurnstileResponse
 	if err := resp.JSON(&result); err != nil {

@@ -16,7 +16,7 @@ jobs:
         goarch: [amd64, arm64]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Golang
         uses: actions/setup-go@v6
@@ -34,7 +34,7 @@ jobs:
           go build -ldflags="-s -w -X bird-lg/client/internal/buildinfo.Version=${{ github.event.release.tag_name }} -X bird-lg/client/internal/buildinfo.Build=${{ github.sha }}" -o bird-lg-client-linux-${{ matrix.goarch }} .
 
       - name: Upload Client Binary
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: apps/client/bird-lg-client-*
 

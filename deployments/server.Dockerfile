@@ -4,7 +4,7 @@ FROM node:24-alpine AS pnpm-base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.34.1 --activate
 
 # Frontend build stage
 FROM pnpm-base AS frontend
@@ -26,7 +26,7 @@ COPY apps/web/ ./
 RUN pnpm build
 
 # Backend build stage
-FROM golang:1.25-alpine AS backend
+FROM golang:1.26.5-alpine AS backend
 
 WORKDIR /app
 
